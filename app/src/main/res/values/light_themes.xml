@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppLightTheme" parent="AppBaseTheme">
+        <item name="txt_hello_color">@color/white</item>
+    </style>
+</resources>

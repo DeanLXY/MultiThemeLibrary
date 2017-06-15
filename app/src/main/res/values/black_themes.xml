@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppBlackTheme" parent="AppBaseTheme">
+        <item name="txt_hello_color">@color/black</item>
+
+    </style>
+
+</resources>
