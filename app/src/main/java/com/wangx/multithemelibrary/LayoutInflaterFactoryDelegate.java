@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ public class LayoutInflaterFactoryDelegate implements android.support.v4.view.La
     private ViewGroup root;
     private TextViewParser mTextViewParser;
     private ImageViewParser mImageViewParser;
+    private BaseParser mBaseParser;
 
     @Override
     public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
@@ -43,7 +45,6 @@ public class LayoutInflaterFactoryDelegate implements android.support.v4.view.La
     }
 
     /**
-     *
      * @param context
      */
     public void changeTheme(Context context) {
@@ -55,21 +56,46 @@ public class LayoutInflaterFactoryDelegate implements android.support.v4.view.La
                 if (child instanceof TextView) {
                     TextViewParser textViewParser = (TextViewParser) parser;
                     TypedValue out = new TypedValue();
+                    // textViewParser.resId  <- R.attr.xxx  <-?xxxxxxx 中的xxxx
                     context.getTheme().resolveAttribute(textViewParser.resId, out, true);
                     TextView textView = (TextView) child;
                     textView.setTextColor(context.getResources().getColor(out.resourceId));
+
+                    context.getTheme().resolveAttribute(textViewParser.backgroundColor, out, true);
+                    textView.setBackgroundColor(context.getResources().getColor(out.resourceId));
+                } else if (child instanceof ImageView) {
+                    ImageViewParser imageViewParser = (ImageViewParser) parser;
+                    TypedValue out = new TypedValue();
+                    ImageView imageView = (ImageView) child;
+                    context.getTheme().resolveAttribute(imageViewParser.src, out, true);
+                    imageView.setImageResource(out.resourceId);
+                } else if (child instanceof View) {//最后匹配的类型
+                    TypedValue out = new TypedValue();
+                    context.getTheme().resolveAttribute(parser.backgroundColor, out, true);
+                    child.setBackgroundColor(out.resourceId);
                 }
             }
+            //changeRoot
+            changeRoot(context);
+        }
+    }
+
+    private void changeRoot(Context context) {
+        if (root instanceof View) {//最后匹配的类型
+            BaseParser parser = (BaseParser) root.getTag();
+            TypedValue out = new TypedValue();
+            context.getTheme().resolveAttribute(parser.backgroundColor, out, true);
+            root.setBackgroundColor(context.getColor(out.resourceId));
         }
     }
 
     /**
      * 解析属性 对 ?attr/对存储
      *
-     * @param name
+     * @param name    view的标签名
      * @param context
      * @param attrs
-     * @param view
+     * @param view    当前解析的view
      */
     private void parseAttrs(String name, Context context, AttributeSet attrs, View view) {
         //TODO 创建对应的Parser
@@ -109,7 +135,7 @@ public class LayoutInflaterFactoryDelegate implements android.support.v4.view.La
                     // ?attr/txt_hello_color
                     TypedValue out = new TypedValue();
                     context.getTheme().resolveAttribute(resId, out, true);
-                    createAttr(attributeName, out.resourceId,resId);
+                    createAttr(attributeName, out.resourceId, resId);
 
                 }
             }
@@ -118,29 +144,33 @@ public class LayoutInflaterFactoryDelegate implements android.support.v4.view.La
     }
 
     private void createParser(View view) {
-        if (view instanceof  TextView) {
+        if (view instanceof TextView) {
             mTextViewParser = new TextViewParser();
             view.setTag(mTextViewParser);
         } else if (view instanceof ImageView) {
             mImageViewParser = new ImageViewParser();
             view.setTag(mImageViewParser);
+        } else if (view instanceof View) {
+            mBaseParser = new BaseParser();
+            view.setTag(mBaseParser);
         }
     }
 
     private void createAttr(String attributeName, int resValue, int resId) {
         if ("background".equalsIgnoreCase(attributeName)) {
             if (mTextViewParser != null) {
-                mTextViewParser.backgroundColor = resValue;
+                mTextViewParser.backgroundColor = resId;
 
             } else if (mImageViewParser != null) {
-                mImageViewParser.backgroundColor = resValue;
-
+                mImageViewParser.backgroundColor = resId;
+            }else if (mBaseParser!= null) {
+                mBaseParser.backgroundColor = resId;
             }
         } else if ("textColor".equalsIgnoreCase(attributeName)) {
-            if (mTextViewParser != null) {
-//                mTextViewParser.textColor = resValue;
-                mTextViewParser.resId = resId;
-            }
+            mTextViewParser.resId = resId;
+
+        } else if ("src".equalsIgnoreCase(attributeName)) {
+            mImageViewParser.src = resId;
         }
     }
 
@@ -158,7 +188,8 @@ public class LayoutInflaterFactoryDelegate implements android.support.v4.view.La
      */
     private boolean isSupportAttr(String attributeName) {
         if ("background".equalsIgnoreCase(attributeName)
-                || "textColor".equalsIgnoreCase(attributeName)) {
+                || "textColor".equalsIgnoreCase(attributeName)
+                || "src".equalsIgnoreCase(attributeName)) {
             return true;
         }
         return false;
@@ -173,7 +204,7 @@ public class LayoutInflaterFactoryDelegate implements android.support.v4.view.La
      * @return
      */
     private View createView(String name, Context context, AttributeSet attrs) {
-        View view = null;
+        View view;
         if (!name.contains(".")) {
             view = createViewFromTag(name, context, attrs);
         } else {
@@ -202,7 +233,8 @@ public class LayoutInflaterFactoryDelegate implements android.support.v4.view.La
         try {
             view = LayoutInflater.from(context).createView(name, prefix, attrs);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            Log.e("throw exception", "createView: ", e);
         }
         return view;
     }

@@ -10,5 +10,5 @@ import android.graphics.drawable.Drawable;
  */
 
 public class ImageViewParser extends BaseParser {
-    public Drawable src;
+    public int src;
 }

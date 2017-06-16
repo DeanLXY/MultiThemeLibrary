@@ -3,6 +3,9 @@
     <!-- Base application theme. -->
     <style name="AppBlackTheme" parent="AppBaseTheme">
         <item name="txt_hello_color">@color/black</item>
+        <item name="src_icon">@mipmap/ic_launcher</item>
+        <item name="background_color">@color/white</item>
+
 
     </style>
 

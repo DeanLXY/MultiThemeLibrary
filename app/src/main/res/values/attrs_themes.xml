@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="txt_hello_color" format="color|reference"/>
+    <attr name="src_icon" format="reference"/>
+    <attr name="background_color" format="color|reference"/>
 </resources>

@@ -9,7 +9,7 @@ import android.view.View;
 public class MainActivity extends AppCompatActivity {
 
     private LayoutInflaterFactoryDelegate mFactory;
-    private int theme = R.style.AppLightTheme;
+    private int theme = R.style.AppBlackTheme;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 

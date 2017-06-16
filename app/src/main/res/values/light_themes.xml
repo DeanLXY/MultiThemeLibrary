@@ -3,5 +3,7 @@
     <!-- Base application theme. -->
     <style name="AppLightTheme" parent="AppBaseTheme">
         <item name="txt_hello_color">@color/white</item>
+        <item name="src_icon">@mipmap/ic_launcher_round</item>
+        <item name="background_color">@color/black</item>
     </style>
 </resources>
